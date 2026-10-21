@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesa de Partes Digital & Código Python</title>
+    
+    <!-- Highlight.js para dar formato al código Python -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <style>
+        :root {
+            --primary: #1b4332;
+            --secondary: #2d6a4f;
+            --accent: #52b788;
+            --bg: #f4f6f8;
+            --card-bg: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* SELECTOR DE OPCIÓN PRINCIPAL */
+        .selector-opciones {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .btn-opcion {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid var(--secondary);
+            background-color: white;
+            color: var(--secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-opcion.active, .btn-opcion:hover {
+            background-color: var(--secondary);
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        header h1 { margin: 0; font-size: 24px; }
+        header p { margin: 5px 0 0; font-size: 14px; opacity: 0.9; }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            background-color: #e2e8f0;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .nav-btn.active, .nav-btn:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .hidden { display: none !important; }
+
+        form {
+            display: grid;
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label { font-weight: 600; font-size: 14px; }
+        input, select, textarea {
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        button.submit-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button.submit-btn:hover { background-color: var(--secondary); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        th { background-color: #f8fafc; color: var(--primary); }
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge.PENDIENTE { background-color: #fef08a; color: #854d0e; }
+        .badge.APROBADO { background-color: #dcfce7; color: #166534; }
+        .badge.RECHAZADO { background-color: #fee2e2; color: #991b1b; }
+        .badge.REVISIÓN { background-color: #e0f2fe; color: #0369a1; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .stat-box h3 { margin: 0; font-size: 28px; color: var(--primary); }
+        .stat-box p { margin: 5px 0 0; color: #64748b; font-size: 14px; }
+
+        /* Estilos vista de Código Python */
+        .btn-link {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007acc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        pre code {
+            border-radius: 8px;
+            font-size: 13px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- BOTONES DE NAVEGACIÓN PRINCIPAL -->
+    <div class="selector-opciones">
+        <button id="btn-modo-web" class="btn-opcion active" onclick="cambiarOpcionPrincipal('web')">🌐 1. Sistema Web Interactivo</button>
+        <button id="btn-modo-codigo" class="btn-opcion" onclick="cambiarOpcionPrincipal('codigo')">📄 2. Ver Código Fuente Python (mesav6.py)</button>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- OPCIÓN 1: SISTEMA WEB DE MESA DE PARTES                  -->
+    <!-- ======================================================== -->
+    <div id="vista-web">
+        <header>
+            <h1>🏛️ Municipalidad de Lima Norte</h1>
+            <p>Sistema Web de Mesa de Partes Digital</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="switchTab('tab-registrar')">📝 Registrar Expediente</button>
+            <button class="nav-btn" onclick="switchTab('tab-listar')">📋 Listar y Consultar</button>
+            <button class="nav-btn" onclick="switchTab('tab-estadisticas')">📊 Estadísticas</button>
+        </div>
+
+        <div id="tab-registrar" class="card">
+            <h2>Registrar Nuevo Expediente</h2>
+            <form id="form-expediente" onsubmit="registrarExpediente(event)">
+                <div class="form-group">
+                    <label>DNI (8 dígitos) o RUC (11 dígitos):</label>
+                    <input type="text" id="documento" required placeholder="Ej. 74839201 o 20601234567">
+                </div>
+                <div class="form-group">
+                    <label>Nombre Completo o Razón Social:</label>
+                    <input type="text" id="remitente" required placeholder="Ej. Juan Pérez / Empresa S.A.C.">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Trámite:</label>
+                    <select id="tipo">
+                        <option value="Licencia de Funcionamiento">Licencia de Funcionamiento</option>
+                        <option value="Reclamo">Reclamo / Queja</option>
+                        <option value="Solicitud de Obras">Solicitud de Obras</option>
+                        <option value="Constancia de Posesión">Constancia de Posesión</option>
+                        <option value="General">Otro / General</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Área de Destino (Derivación):</label>
+                    <select id="area">
+                        <option value="Gerencia de Rentas">Gerencia de Rentas</option>
+                        <option value="Obras Públicas">Obras Públicas</option>
+                        <option value="Secretaría General">Secretaría General</option>
+                        <option value="Desarrollo Social">Desarrollo Social</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Asunto / Detalle:</label>
+                    <textarea id="asunto" rows="3" required placeholder="Describa el motivo del trámite..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Generar Expediente y Ticket</button>
+            </form>
+        </div>
+
+        <div id="tab-listar" class="card hidden">
+            <h2>Listado y Búsqueda de Expedientes</h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="buscador" onkeyup="filtrarExpedientes()" placeholder="Buscar por código, DNI o remitente..." style="flex: 1;">
+                <button onclick="exportarCSV()" class="nav-btn" style="background-color: var(--primary); color: white;">📥 Exportar CSV</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Remitente</th>
+                            <th>Área</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-estadisticas" class="card hidden">
+            <h2>Panel Estadístico del Sistema</h2>
+            <div class="stats-grid">
+                <div class="stat-box"><h3 id="stat-total">0</h3><p>Total Registrados</p></div>
+                <div class="stat-box"><h3 id="stat-pendientes">0</h3><p>Pendientes</p></div>
+                <div class="stat-box"><h3 id="stat-aprobados">0</h3><p>Aprobados</p></div>
+                <div class="stat-box"><h3 id="stat-rechazados">0</h3><p>Rechazados</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- OPCIÓN 2: VISTA CÓDIGO FUENTE PYTHON (mesav6.py)         -->
+    <!-- ======================================================== -->
+    <div id="vista-codigo" class="hidden">
+        <div class="card" style="background-color: #1e1e1e; color: #d4d4d4;">
+            <h1 style="margin-top:0;">Código Fuente: mesav6.py</h1>
+            <a href="mesav6.py" class="btn-link" target="_blank" download="mesav6.py">📥 Descargar mesav6.py</a>
+
+            <pre><code class="language-python">import os
+from datetime import datetime
+
+# Códigos de color ANSI para la consola
+ROJO = "\033[91m"
+VERDE = "\033[92m"
+AMARILLO = "\033[93m"
+AZUL = "\033[94m"
+RESET = "\033[0m"
+
+# Archivo de persistencia de datos
+NOMBRE_ARCHIVO = "expedientes_mesa_de_partes.txt"
+
+def cargar_datos():
+    """Carga los expedientes guardados previamente en el archivo plano."""
+    expedientes = []
+    if os.path.exists(NOMBRE_ARCHIVO):
+        try:
+            with open(NOMBRE_ARCHIVO, "r", encoding="utf-8") as f:
+                for linea in f:
+                    partes = linea.strip().split("|")
+                    if len(partes) == 4:
+                        expedientes.append({
+                            "codigo": partes[0],
+                            "documento": partes[1],
+                            "remitente": partes[2],
+                            "asunto": partes[3],
+                            "fecha": "26/10/2026 00:00",
+                            "estado": "PENDIENTE",
+                            "tipo": "General",
+                            "area": "Secretaría General",
+                            "observaciones": "Ninguna"
+                        })
+                    elif len(partes) == 6:
+                        expedientes.append({
+                            "codigo": partes[0],
+                            "documento": partes[1],
+                            "remitente": partes[2],
+                            "asunto": partes[3],
+                            "fecha": partes[4],
+                            "estado": partes[5],
+                            "tipo": "General",
+                            "area": "Secretaría General",
+                            "observaciones": "Ninguna"
+                        })
+                    elif len(partes) == 9:
+                        expedientes.append({
+                            "codigo": partes[0],
+                            "documento": partes[1],
+                            "remitente": partes[2],
+                            "asunto": partes[3],
+                            "fecha": partes[4],
+                            "estado": partes[5],
+                            "tipo": partes[6],
+                            "area": partes[7],
+                            "observaciones": partes[8]
+                        })
+        except Exception as e:
+            print(f"{ROJO}[ERROR] No se pudo leer el archivo: {e}{RESET}")
+    return expedientes
+
+def guardar_datos(expedientes):
+    """Guarda la lista actualizada de expedientes en el archivo plano."""
+    try:
+        with open(NOMBRE_ARCHIVO, "w", encoding="utf-8") as f:
+            for exp in expedientes:
+                f.write(f"{exp['codigo']}|{exp['documento']}|{exp['remitente']}|{exp['asunto']}|{exp['fecha']}|{exp['estado']}|{exp['tipo']}|{exp['area']}|{exp['observaciones']}\n")
+        print(f"\n{VERDE}[ÉXITO] Datos guardados permanentemente en el archivo.{RESET}")
+    except Exception as e:
+        print(f"{ROJO}[ERROR] Ocurrió un fallo al guardar los datos: {e}{RESET}")
+
+def validar_documento(doc):
+    """Valida si el DNI (8 dígitos) o RUC (11 dígitos) contiene solo números."""
+    doc_limpio = doc.strip()
+    return doc_limpio.isdigit() and len(doc_limpio) in (8, 11)
+
+def formatear_celda(texto, ancho):
+    """Ajusta el texto exactamente al ancho de la celda, recortando si es muy largo."""
+    texto_str = str(texto)
+    if len(texto_str) > ancho:
+        return texto_str[:ancho-2] + ".."
+    return f"{texto_str:<{ancho}}"
+
+def generar_comprobante(exp):
+    """Genera un archivo de texto individual como cargo de recepción digital."""
+    nombre_txt = f"Comprobante_{exp['codigo']}.txt"
+    try:
+        with open(nombre_txt, "w", encoding="utf-8") as f:
+            f.write("========================================\n")
+            f.write("   MUNICIPALIDAD DE LIMA NORTE - TICKET\n")
+            f.write("      COMPROBANTE DE MESA DE PARTES\n")
+            f.write("========================================\n")
+            f.write(f"CÓDIGO      : {exp['codigo']}\n")
+            f.write(f"FECHA/HORA  : {exp['fecha']}\n")
+            f.write(f"TIPO TRÁMITE: {exp['tipo']}\n")
+            f.write(f"ÁREA DESTINO: {exp['area']}\n")
+            f.write(f"DNI/RUC     : {exp['documento']}\n")
+            f.write(f"REMITENTE   : {exp['remitente']}\n")
+            f.write(f"ASUNTO      : {exp['asunto']}\n")
+            f.write(f"ESTADO      : {exp['estado']}\n")
+            f.write(f"OBSERVACIONES: {exp['observaciones']}\n")
+            f.write("========================================\n")
+            f.write("Guarde este código para consultar el estado.\n")
+        print(f"{VERDE}[COMPROBANTE] Se generó el archivo '{nombre_txt}' exitosamente.{RESET}")
+    except Exception as e:
+        print(f"{ROJO}[ERROR] No se pudo generar el comprobante TXT: {e}{RESET}")
+
+def registrar_expediente(expedientes):
+    """Captura y valida la información del expediente incluyendo tipo y área de derivación."""
+    print(f"\n{AMARILLO}--- REGISTRO DE NUEVO EXPEDIENTE ---{RESET}")
+    
+    num_correlativo = len(expedientes) + 1
+    codigo = f"EXP-2026-{num_correlativo:04d}"
+    print(f"{AZUL}Código asignado:{RESET} {codigo}")
+    
+    fecha_actual = datetime.now().strftime("%d/%m/%Y %H:%M")
+    print(f"{AZUL}Fecha y Hora de registro:{RESET} {fecha_actual}")
+    
+    while True:
+        doc = input("Ingrese DNI (8 dígitos) o RUC (11 dígitos) del remitente: ").strip()
+        if validar_documento(doc):
+            break
+        print(f"{ROJO}[ATENCIÓN] El documento ingresado no es válido. Debe escribir un DNI (8 dígitos) o RUC (11 dígitos) numéricos.{RESET}")
+        
+    remitente = input("Ingrese Nombre Completo o Razón Social: ").strip()
+    while not remitente:
+        remitente = input(f"{ROJO}[OBLIGATORIO] El nombre no puede estar vacío:{RESET} ").strip()
+        
+    print("\nSeleccione el Tipo de Trámite:")
+    print("  1. Licencia de Funcionamiento")
+    print("  2. Reclamo / Queja")
+    print("  3. Solicitud de Obras")
+    print("  4. Constancia de Posesión")
+    print("  5. Otro / General")
+    t_op = input("Seleccione opción (1-5): ").strip()
+    tipos_map = {
+        "1": "Licencia de Funcionamiento",
+        "2": "Reclamo",
+        "3": "Solicitud de Obras",
+        "4": "Constancia de Posesión",
+        "5": "General"
+    }
+    tipo_tramite = tipos_map.get(t_op, "General")
+
+    print("\nSeleccione el Área de Destino (Derivación):")
+    print("  1. Gerencia de Rentas")
+    print("  2. Obras Públicas")
+    print("  3. Secretaría General")
+    print("  4. Desarrollo Social")
+    a_op = input("Seleccione opción (1-4): ").strip()
+    areas_map = {
+        "1": "Gerencia de Rentas",
+        "2": "Obras Públicas",
+        "3": "Secretaría General",
+        "4": "Desarrollo Social"
+    }
+    area_destino = areas_map.get(a_op, "Secretaría General")
+
+    asunto = input("Ingrese el Asunto/Detalle del trámite: ").strip()
+    while not asunto:
+        asunto = input(f"{ROJO}[OBLIGATORIO] El asunto no puede estar vacío:{RESET} ").strip()
+        
+    observaciones = input("Ingrese observaciones iniciales o notas (opcional): ").strip()
+    if not observaciones:
+        observaciones = "Ninguna"
+        
+    nuevo = {
+        "codigo": codigo,
+        "documento": doc,
+        "remitente": remitente,
+        "asunto": asunto,
+        "fecha": fecha_actual,
+        "estado": "PENDIENTE",
+        "tipo": tipo_tramite,
+        "area": area_destino,
+        "observaciones": observaciones
+    }
+    
+    expedientes.append(nuevo)
+    print(f"\n{VERDE}[CONFIRMACIÓN] Expediente {codigo} registrado con éxito y derivado a {area_destino}.{RESET}")
+    generar_comprobante(nuevo)
+
+def buscar_expediente(expedientes):
+    """Búsqueda lineal por código exacto de expediente."""
+    print(f"\n{AMARILLO}--- BÚSQUEDA DE EXPEDIENTE POR CÓDIGO ---{RESET}")
+    cod_buscar = input("Ingrese el código a buscar (ej. EXP-2026-0001): ").strip().upper()
+    
+    hallado = False
+    for exp in expedientes:
+        if exp["codigo"].upper() == cod_buscar:
+            print(f"\n{AZUL}----------------------------------------{RESET}")
+            print(f"CÓDIGO      : {exp['codigo']}")
+            print(f"FECHA       : {exp['fecha']}")
+            print(f"TIPO        : {exp['tipo']}")
+            print(f"ÁREA        : {exp['area']}")
+            print(f"DNI/RUC     : {exp['documento']}")
+            print(f"REMITENTE   : {exp['remitente']}")
+            print(f"ASUNTO      : {exp['asunto']}")
+            print(f"ESTADO      : {exp['estado']}")
+            print(f"OBSERVACIONES: {exp['observaciones']}")
+            print(f"{AZUL}----------------------------------------{RESET}")
+            hallado = True
+            break
+            
+    if not hallado:
+        print(f"\n{ROJO}[INFORMACIÓN] No se encontró ningún expediente con el código '{cod_buscar}'.{RESET}")
+
+def busqueda_avanzada(expedientes):
+    """Permite filtrar por número de documento o por coincidencia parcial en el nombre del remitente."""
+    print(f"\n{AMARILLO}--- BÚSQUEDA AVANZADA / FILTRADO ---{RESET}")
+    if not expedientes:
+        print(f"{ROJO}No hay expedientes registrados en el sistema.{RESET}")
+        return
+
+    print("1. Buscar por número de DNI o RUC")
+    print("2. Buscar por nombre o coincidencia de Remitente")
+    op = input("Seleccione criterio de búsqueda (1-2): ").strip()
+
+    resultados = []
+    if op == "1":
+        doc_buscado = input("Ingrese el DNI o RUC a buscar: ").strip()
+        resultados = [e for e in expedientes if doc_buscado in e["documento"]]
+    elif op == "2":
+        nombre_buscado = input("Ingrese parte del nombre o razón social: ").strip().lower()
+        resultados = [e for e in expedientes if nombre_buscado in e["remitente"].lower()]
+    else:
+        print(f"{ROJO}[ERROR] Opción no válida.{RESET}")
+        return
+
+    if not resultados:
+        print(f"\n{ROJO}[INFORMACIÓN] No se encontraron expedientes con ese criterio.{RESET}")
+        return
+
+    print(f"\n{VERDE}Se encontraron {len(resultados)} coincidencia(s):{RESET}")
+    col_widths = [12, 14, 18, 18, 20, 12]
+    print(f"{VERDE}┌" + "┬".join("─" * (w + 2) for w in col_widths) + f"┐{RESET}")
+    headers = ["CÓDIGO", "TIPO", "REMITENTE", "ÁREA", "ASUNTO", "ESTADO"]
+    print(f"{VERDE}│{RESET} " + f" {VERDE}│{RESET} ".join(formatear_celda(h, w) for h, w in zip(headers, col_widths)) + f" {VERDE}│{RESET}")
+    print(f"{VERDE}├" + "┼".join("─" * (w + 2) for w in col_widths) + f"┤{RESET}")
+    
+    for idx, exp in enumerate(resultados):
+        valores = [exp['codigo'], exp['tipo'], exp['remitente'], exp['area'], exp['asunto'], exp['estado']]
+        print(f"{VERDE}│{RESET} " + f" {VERDE}│{RESET} ".join(formatear_celda(v, w) for v, w in zip(valores, col_widths)) + f" {VERDE}│{RESET}")
+        if idx < len(resultados) - 1:
+            print(f"{VERDE}├" + "┼".join("─" * (w + 2) for w in col_widths) + f"┤{RESET}")
+    print(f"{VERDE}└" + "┴".join("─" * (w + 2) for w in col_widths) + f"┘{RESET}")
+
+def ordenar_y_listar(expedientes):
+    """Ordena los expedientes mediante Bubble Sort y los muestra en una tabla tipo Excel."""
+    print(f"\n{AMARILLO}--- LISTADO DE EXPEDIENTES REGISTRADOS ---{RESET}")
+    if not expedientes:
+        print(f"{VERDE}┌──────────────────────────────────────────────┐{RESET}")
+        print(f"{VERDE}│{RESET} {ROJO}No hay expedientes registrados en el sistema.{RESET}         {VERDE}│{RESET}")
+        print(f"{VERDE}└──────────────────────────────────────────────┘{RESET}")
+        return
+        
+    n = len(expedientes)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if expedientes[j]["codigo"] > expedientes[j + 1]["codigo"]:
+                expedientes[j], expedientes[j + 1] = expedientes[j + 1], expedientes[j]
+                
+    col_widths = [12, 14, 18, 18, 20, 12]
+    print(f"{VERDE}┌" + "┬".join("─" * (w + 2) for w in col_widths) + f"┐{RESET}")
+    headers = ["CÓDIGO", "TIPO", "REMITENTE", "ÁREA", "ASUNTO", "ESTADO"]
+    print(f"{VERDE}│{RESET} " + f" {VERDE}│{RESET} ".join(formatear_celda(h, w) for h, w in zip(headers, col_widths)) + f" {VERDE}│{RESET}")
+    print(f"{VERDE}├" + "┼".join("─" * (w + 2) for w in col_widths) + f"┤{RESET}")
+    
+    for idx, exp in enumerate(expedientes):
+        valores = [exp['codigo'], exp['tipo'], exp['remitente'], exp['area'], exp['asunto'], exp['estado']]
+        print(f"{VERDE}│{RESET} " + f" {VERDE}│{RESET} ".join(formatear_celda(v, w) for v, w in zip(valores, col_widths)) + f" {VERDE}│{RESET}")
+        if idx < len(expedientes) - 1:
+            print(f"{VERDE}├" + "┼".join("─" * (w + 2) for w in col_widths) + f"┤{RESET}")
+    print(f"{VERDE}└" + "┴".join("─" * (w + 2) for w in col_widths) + f"┘{RESET}")
+
+def modificar_expediente(expedientes):
+    """Permite corregir remitente, asunto, estado o agregar observaciones al buzón."""
+    print(f"\n{AMARILLO}--- MODIFICAR / ACTUALIZAR EXPEDIENTE ---{RESET}")
+    if not expedientes:
+        print(f"{ROJO}No hay expedientes en el sistema para modificar.{RESET}")
+        return
+
+    cod = input("Ingrese el código del expediente a modificar (ej. EXP-2026-0001): ").strip().upper()
+    encontrado = None
+    for exp in expedientes:
+        if exp["codigo"].upper() == cod:
+            encontrado = exp
+            break
+
+    if not encontrado:
+        print(f"{ROJO}[ERROR] No se encontró el expediente con código '{cod}'.{RESET}")
+        return
+
+    print(f"\nExpediente encontrado: {encontrado['codigo']} | Estado actual: {encontrado['estado']}")
+    print("1. Modificar Remitente")
+    print("2. Modificar Asunto")
+    print("3. Actualizar Estado del Trámite (Workflow)")
+    print("4. Agregar / Actualizar Buzón de Observaciones")
+    op = input("Seleccione qué desea hacer (1-4): ").strip()
+
+    if op == "1":
+        nuevo_rem = input("Ingrese el nuevo Remitente / Razón Social: ").strip()
+        if nuevo_rem:
+            encontrado["remitente"] = nuevo_rem
+            print(f"\n{VERDE}[ÉXITO] Remitente actualizado.{RESET}")
+    elif op == "2":
+        nuevo_asu = input("Ingrese el nuevo Asunto: ").strip()
+        if nuevo_asu:
+            encontrado["asunto"] = nuevo_asu
+            print(f"\n{VERDE}[ÉXITO] Asunto actualizado.{RESET}")
+    elif op == "3":
+        print("\nSeleccione el nuevo estado:")
+        print("  1. PENDIENTE")
+        print("  2. EN REVISIÓN")
+        print("  3. APROBADO")
+        print("  4. RECHAZADO (Subsanación)")
+        est_op = input("Opción de estado (1-4): ").strip()
+        estados_map = {"1": "PENDIENTE", "2": "EN REVISIÓN", "3": "APROBADO", "4": "RECHAZADO"}
+        if est_op in estados_map:
+            encontrado["estado"] = estados_map[est_op]
+            print(f"\n{VERDE}[ÉXITO] Estado del trámite actualizado a: {encontrado['estado']}{RESET}")
+        else:
+            print(f"{ROJO}[ERROR] Opción de estado no válida.{RESET}")
+    elif op == "4":
+        nueva_obs = input("Ingrese la nota u observación para el ciudadano: ").strip()
+        if nueva_obs:
+            encontrado["observaciones"] = nueva_obs
+            print(f"\n{VERDE}[ÉXITO] Observación registrada en el buzón.{RESET}")
+    else:
+        print(f"{ROJO}[ERROR] Opción no válida.{RESET}")
+
+def eliminar_expediente(expedientes):
+    """Da de baja/elimina un expediente mediante su código con confirmación."""
+    print(f"\n{AMARILLO}--- ELIMINAR EXPEDIENTE ---{RESET}")
+    if not expedientes:
+        print(f"{ROJO}No hay expedientes en el sistema para eliminar.{RESET}")
+        return
+
+    cod = input("Ingrese el código del expediente a eliminar (ej. EXP-2026-0001): ").strip().upper()
+    encontrado = None
+    for exp in expedientes:
+        if exp["codigo"].upper() == cod:
+            encontrado = exp
+            break
+
+    if not encontrado:
+        print(f"{ROJO}[ERROR] No se encontró el expediente con código '{cod}'.{RESET}")
+        return
+
+    print(f"\nSe va a eliminar el expediente:")
+    print(f"Código: {encontrado['codigo']} | Remitente: {encontrado['remitente']} | Asunto: {encontrado['asunto']}")
+    confirmacion = input(f"{ROJO}¿Está seguro de eliminar este expediente? (S/N): {RESET}").strip().upper()
+
+    if confirmacion == "S":
+        expedientes.remove(encontrado)
+        print(f"\n{VERDE}[ÉXITO] El expediente {cod} ha sido eliminado del sistema.{RESET}")
+    else:
+        print(f"{AMARILLO}[CANCELADO] La operación de eliminación fue cancelada.{RESET}")
+
+def exportar_csv(expedientes):
+    """Exporta los expedientes actuales a un archivo CSV compatible con Excel."""
+    print(f"\n{AMARILLO}--- EXPORTAR DATOS A CSV ---{RESET}")
+    if not expedientes:
+        print(f"{ROJO}No hay expedientes para exportar.{RESET}")
+        return
+    
+    nombre_csv = "reporte_expedientes.csv"
+    try:
+        with open(nombre_csv, "w", encoding="utf-8-sig") as f:
+            f.write("Codigo,FechaHora,Tipo,Area,Documento,Remitente,Asunto,Estado,Observaciones\n")
+            for exp in expedientes:
+                f.write(f"{exp['codigo']},{exp['fecha']},{exp['tipo']},{exp['area']},{exp['documento'],},\"{exp['remitente']}\",\"{exp['asunto']}\",{exp['estado']},\"{exp['observaciones']}\"\n")
+        print(f"{VERDE}[ÉXITO] Datos exportados correctamente al archivo '{nombre_csv}'. ¡Ya puedes abrirlo en Excel!{RESET}")
+    except Exception as e:
+        print(f"{ROJO}[ERROR] No se pudo exportar el archivo CSV: {e}{RESET}")
+
+def hacer_backup(expedientes):
+    """Genera una copia de respaldo exacta de la base de datos."""
+    print(f"\n{AMARILLO}--- SISTEMA DE COPIA DE SEGURIDAD (BACKUP) ---{RESET}")
+    if not expedientes:
+        print(f"{ROJO}No hay datos para respaldar.{RESET}")
+        return
+        
+    nombre_backup = "respaldo_expedientes.txt"
+    try:
+        with open(nombre_backup, "w", encoding="utf-8") as f:
+            for exp in expedientes:
+                f.write(f"{exp['codigo']}|{exp['documento']}|{exp['remitente']}|{exp['asunto']}|{exp['fecha']}|{exp['estado']}|{exp['tipo']}|{exp['area']}|{exp['observaciones']}\n")
+        print(f"{VERDE}[ÉXITO] Copia de seguridad generada correctamente en '{nombre_backup}'.{RESET}")
+    except Exception as e:
+        print(f"{ROJO}[ERROR] Ocurrió un fallo al crear el respaldo: {e}{RESET}")
+
+def mostrar_estadisticas(expedientes):
+    """Muestra información analítica del sistema incluyendo gráficos de barras ASCII."""
+    print(f"\n{AZUL}==========================================")
+    print("        ESTADÍSTICAS DEL SISTEMA")
+    print(f"=========================================={RESET}")
+    
+    total = len(expedientes)
+    if total == 0:
+        print(f"{ROJO}No hay datos suficientes para generar estadísticas.{RESET}")
+        return
+
+    dni_count = sum(1 for e in expedientes if len(e["documento"]) == 8)
+    ruc_count = sum(1 for e in expedientes if len(e["documento"]) == 11)
+    pendientes = sum(1 for e in expedientes if e["estado"] == "PENDIENTE")
+    en_revision = sum(1 for e in expedientes if e["estado"] == "EN REVISIÓN")
+    aprobados = sum(1 for e in expedientes if e["estado"] == "APROBADO")
+    rechazados = sum(1 for e in expedientes if e["estado"] == "RECHAZADO")
+    ultimo_codigo = expedientes[-1]["codigo"] if expedientes else "Ninguno"
+
+    print(f"• Total de expedientes registrados : {total}")
+    print(f"• Trámites con DNI (Personas Nat.)  : {dni_count}")
+    print(f"• Trámites con RUC (Empresas)      : {ruc_count}")
+    print(f"• Último código generado           : {ultimo_codigo}\n")
+
+    print(f"{AMARILLO}--- GRÁFICO ESTADÍSTICO (ESTADOS) ---{RESET}")
+    print(f"PENDIENTES  : {'█' * pendientes} ({pendientes})")
+    print(f"EN REVISIÓN : {'█' * en_revision} ({en_revision})")
+    print(f"APROBADOS   : {'█' * aprobados} ({aprobados})")
+    print(f"RECHAZADOS  : {'█' * rechazados} ({rechazados})")
+    print(f"{AZUL}=========================================={RESET}")
+
+def mostrar_ayuda_faq():
+    """Muestra el manual de usuario y preguntas frecuentes (FAQ)."""
+    print(f"\n{AZUL}==========================================")
+    print("         MENÚ DE AYUDA / FAQ")
+    print(f"=========================================={RESET}")
+    print("1. ¿Cómo se genera el código de expediente?")
+    print("   -> Se genera automáticamente de forma correlativa (Ej. EXP-2026-0001).")
+    print("2. ¿Qué documentos son válidos para el remitente?")
+    print("   -> DNI de exactamente 8 dígitos numéricos o RUC de 11 dígitos numéricos.")
+    print("3. ¿Para qué sirve el buzón de observaciones?")
+    print("   -> Permite dejar notas internas o requerir la subsanación de documentos al ciudadano.")
+    print("4. ¿Dónde se guardan los datos?")
+    print("   -> En el archivo plano 'expedientes_mesa_de_partes.txt' ubicado en tu misma carpeta.")
+    print(f"{AZUL}=========================================={RESET}")
+
+def login_sistema():
+    """Sistema básico de roles y permisos por consola."""
+    print(f"\n{AZUL}==========================================")
+    print("    CONTROL DE ACCESO - MUNI LIMA NORTE")
+    print(f"=========================================={RESET}")
+    print("Seleccione su perfil de usuario:")
+    print("  1. Administrador (Control total del sistema)")
+    print("  2. Personal de Mesa de Partes (Registro y gestión)")
+    print("  3. Ciudadano / Consulta (Solo lectura y búsqueda)")
+    
+    rol_op = input("Seleccione perfil (1-3): ").strip()
+    if rol_op == "1":
+        print(f"{VERDE}[ACCESO CONCEDIDO] Perfil: Administrador{RESET}")
+        return "ADMIN"
+    elif rol_op == "2":
+        print(f"{VERDE}[ACCESO CONCEDIDO] Perfil: Personal de Mesa de Partes{RESET}")
+        return "PERSONAL"
+    elif rol_op == "3":
+        print(f"{VERDE}[ACCESO CONCEDIDO] Perfil: Ciudadano / Consulta{RESET}")
+        return "CIUDADANO"
+    else:
+        print(f"{ROJO}[ACCESO DÉBIL/INVÁLIDO] Ingresando por defecto como Personal.{RESET}")
+        return "PERSONAL"
+
+def main():
+    rol_actual = login_sistema()
+    expedientes = cargar_datos()
+    
+    while True:
+        print(f"\n{AZUL}==========================================")
+        print(f" MESA DE PARTES DIGITAL - PERFIL: [{rol_actual}]")
+        print(f"=========================================={RESET}")
+        
+        if rol_actual in ("ADMIN", "PERSONAL"):
+            print("1. Registrar nuevo expediente")
+            print("2. Buscar expediente por código")
+            print("3. Búsqueda avanzada / Filtrado")
+            print("4. Ordenar y listar expedientes")
+            print("5. Modificar expediente / Actualizar Estado / Buzón")
+            if rol_actual == "ADMIN":
+                print("6. Eliminar expediente")
+            print("7. Estadísticas y Gráficos del Sistema")
+            print("8. Exportar datos a formato CSV (Excel)")
+            print("9. Generar Copia de Seguridad (Backup)")
+            print("10. Menú de Ayuda / FAQ")
+            print("11. Guardar cambios y salir")
+        else:
+            print("2. Buscar expediente por código")
+            print("3. Búsqueda avanzada / Filtrado")
+            print("4. Ordenar y listar expedientes")
+            print("10. Menú de Ayuda / FAQ")
+            print("11. Salir del sistema")
+        
+        opcion = input("Seleccione una opción: ").strip()
+        
+        if rol_actual in ("ADMIN", "PERSONAL"):
+            if opcion == "1":
+                registrar_expediente(expedientes)
+            elif opcion == "2":
+                buscar_expediente(expedientes)
+            elif opcion == "3":
+                busqueda_avanzada(expedientes)
+            elif opcion == "4":
+                ordenar_y_listar(expedientes)
+            elif opcion == "5":
+                modificar_expediente(expedientes)
+            elif opcion == "6" and rol_actual == "ADMIN":
+                eliminar_expediente(expedientes)
+            elif opcion == "6" and rol_actual != "ADMIN":
+                print(f"{ROJO}[ACCESO DENEGADO] Solo el Administrador puede eliminar registros.{RESET}")
+            elif opcion == "7":
+                mostrar_estadisticas(expedientes)
+            elif opcion == "8":
+                exportar_csv(expedientes)
+            elif opcion == "9":
+                hacer_backup(expedientes)
+            elif opcion == "10":
+                mostrar_ayuda_faq()
+            elif opcion == "11":
+                guardar_datos(expedientes)
+                print(f"{VERDE}Gracias por utilizar el prototipo de Mesa de Partes Digital.{RESET}")
+                break
+            else:
+                print(f"{ROJO}[ERROR] Opción no válida o sin permisos.{RESET}")
+        else:
+            if opcion == "2":
+                buscar_expediente(expedientes)
+            elif opcion == "3":
+                busqueda_avanzada(expedientes)
+            elif opcion == "4":
+                ordenar_y_listar(expedientes)
+            elif opcion == "10":
+                mostrar_ayuda_faq()
+            elif opcion == "11":
+                print(f"{VERDE}Gracias por consultar el sistema de Mesa de Partes Digital.{RESET}")
+                break
+            else:
+                print(f"{ROJO}[ERROR] Opción no válida para su perfil.{RESET}")
+
+if __name__ == "__main__":
+    main()
+            </code></pre>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // LÓGICA DE CAMBIO ENTRE VISTA WEB Y VISTA CÓDIGO
+    function cambiarOpcionPrincipal(modo) {
+        const vistaWeb = document.getElementById('vista-web');
+        const vistaCodigo = document.getElementById('vista-codigo');
+        const btnWeb = document.getElementById('btn-modo-web');
+        const btnCodigo = document.getElementById('btn-modo-codigo');
+
+        if (modo === 'web') {
+            vistaWeb.classList.remove('hidden');
+            vistaCodigo.classList.add('hidden');
+            btnWeb.classList.add('active');
+            btnCodigo.classList.remove('active');
+        } else {
+            vistaWeb.classList.add('hidden');
+            vistaCodigo.classList.remove('hidden');
+            btnCodigo.classList.add('active');
+            btnWeb.classList.remove('active');
+        }
+    }
+
+    // LÓGICA DEL SISTEMA WEB (MESA DE PARTES)
+    let expedientes = JSON.parse(localStorage.getItem("expedientes_mesa")) || [];
+
+    function switchTab(tabId) {
+        document.querySelectorAll('#vista-web .card').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.remove('hidden');
+        event.currentTarget.classList.add('active');
+        if(tabId === 'tab-listar') renderTabla();
+        if(tabId === 'tab-estadisticas') actualizarEstadisticas();
+    }
+
+    function registrarExpediente(e) {
+        e.preventDefault();
+        const doc = document.getElementById('documento').value.trim();
+        
+        if (!/^\d{8}$/.test(doc) && !/^\d{11}$/.test(doc)) {
+            alert("Error: El documento debe ser un DNI válido de 8 dígitos o un RUC de 11 dígitos numéricos.");
+            return;
+        }
+
+        const numCorrelativo = expedientes.length + 1;
+        const codigo = `EXP-2026-${String(numCorrelativo).padStart(4, '0')}`;
+        const now = new Date();
+        const fecha = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+        const nuevo = {
+            codigo,
+            documento: doc,
+            remitente: document.getElementById('remitente').value.trim(),
+            tipo: document.getElementById('tipo').value,
+            area: document.getElementById('area').value,
+            asunto: document.getElementById('asunto').value.trim(),
+            fecha,
+            estado: "PENDIENTE",
+            observaciones: "Ninguna"
+        };
+
+        expedientes.push(nuevo);
+        localStorage.setItem("expedientes_mesa", JSON.stringify(expedientes));
+        
+        alert(`¡Expediente registrado con éxito!\nCódigo asignado: ${codigo}`);
+        document.getElementById('form-expediente').reset();
+        switchTab('tab-listar');
+    }
+
+    function renderTabla(datos = expedientes) {
+        const tbody = document.getElementById('lista-body');
+        tbody.innerHTML = '';
+        if (datos.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#64748b;">No hay expedientes registrados.</td></tr>`;
+            return;
+        }
+
+        datos.forEach((exp) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${exp.codigo}</strong></td>
+                    <td>${exp.fecha}</td>
+                    <td>${exp.tipo}</td>
+                    <td>${exp.remitente}<br><small style="color:#64748b;">Doc: ${exp.documento}</small></td>
+                    <td>${exp.area}</td>
+                    <td><span class="badge ${exp.estado}">${exp.estado}</span></td>
+                    <td>
+                        <button onclick="cambiarEstado('${exp.codigo}')" title="Cambiar Estado" style="cursor:pointer; background:none; border:none; font-size:16px;">⚙️</button>
+                        <button onclick="eliminar('${exp.codigo}')" title="Eliminar" style="cursor:pointer; background:none; border:none; font-size:16px;">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function filtrarExpedientes() {
+        const query = document.getElementById('buscador').value.toLowerCase();
+        const filtrados = expedientes.filter(e => 
+            e.codigo.toLowerCase().includes(query) || 
+            e.documento.includes(query) || 
+            e.remitente.toLowerCase().includes(query)
+        );
+        renderTabla(filtrados);
+    }
+
+    function cambiarEstado(codigo) {
+        const exp = expedientes.find(e => e.codigo === codigo);
+        if(!exp) return;
+        const nuevoEstado = prompt("Seleccione nuevo estado:\n1. PENDIENTE\n2. EN REVISIÓN\n3. APROBADO\n4. RECHAZADO", "PENDIENTE");
+        const mapa = {"1": "PENDIENTE", "2": "EN REVISIÓN", "3": "APROBADO", "4": "RECHAZADO"};
+        if(mapa[nuevoEstado]) {
+            exp.estado = mapa[nuevoEstado];
+            localStorage.setItem("expedientes_mesa", JSON.stringify(expedientes));
+            renderTabla();
+        }
+    }
+
+    function eliminar(codigo) {
+        if(confirm(`¿Está seguro de eliminar el expediente ${codigo}?`)) {
+            expedientes = expedientes.filter(e => e.codigo !== codigo);
+            localStorage.setItem("expedientes_mesa", JSON.stringify(expedientes));
+            renderTabla();
+        }
+    }
+
+    function actualizarEstadisticas() {
+        document.getElementById('stat-total').innerText = expedientes.length;
+        document.getElementById('stat-pendientes').innerText = expedientes.filter(e => e.estado === 'PENDIENTE').length;
+        document.getElementById('stat-aprobados').innerText = expedientes.filter(e => e.estado === 'APROBADO').length;
+        document.getElementById('stat-rechazados').innerText = expedientes.filter(e => e.estado === 'RECHAZADO').length;
+    }
+
+    function exportarCSV() {
+        if(expedientes.length === 0) { alert("No hay datos para exportar."); return; }
+        let csv = "Codigo,Fecha,Tipo,Area,Documento,Remitente,Asunto,Estado\n";
+        expedientes.forEach(e => {
+            csv += `${e.codigo},${e.fecha},${e.tipo},${e.area},${e.documento},"${e.remitente}","${e.asunto}",${e.estado}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "reporte_expedientes.csv";
+        link.click();
+    }
+</script>
+
+</body>
+</html>
